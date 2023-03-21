@@ -1,0 +1,35 @@
+version: "3"
+services:
+  app:
+    container_name: nodeapp
+    restart: on-failure
+    command: npm run dev
+    build: .
+    env_file:
+      - .env
+    ports:
+      - 3000:3000
+    depends_on:
+      - postgres
+    networks:
+      - internal
+    volumes:
+      - .:/app/
+      - /app/node_modules
+    
+  postgres:
+    image: postgres:14.7-alpine
+    container_name: postgres
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=admin
+      - POSTGRES_DB=forbarbers
+    networks:
+      - internal
+
+networks:
+  internal:
+    driver: bridge
+    name: backend-network

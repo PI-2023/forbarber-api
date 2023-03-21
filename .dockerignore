@@ -1,0 +1,6 @@
+# Pastas
+node_modules/
+
+# Arquivos
+.env
+npm-debug.log

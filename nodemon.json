@@ -1,0 +1,12 @@
+{
+  "verbose": true,
+  "delay": 5000,
+  "ignore": [
+    ".git",
+    ".env",
+    ".env.example",
+    ".gitignore",
+    "npm-debug.log",
+    "node_modules/**/node_modules"
+  ]
+}

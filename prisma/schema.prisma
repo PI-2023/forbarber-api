@@ -1,0 +1,162 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource database {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+    // Denifições da tabela
+    @@map("TB_USUARIO")
+
+    // Atributos
+    id Int @id @default(autoincrement()) @map("ID_USUARIO")
+    name String @database.VarChar(128) @map("NM_USUARIO")
+    email String @database.VarChar(128) @map("EM_USUARIO")
+    contact String @database.VarChar(16) @map("CN_USUARIO")
+    password String @database.VarChar(32) @map("SN_USUARIO") // CRIPTOGRAFADO
+    photo String? @database.VarChar(128) @map("PH_USUARIO")
+   
+    // Relacionamentos
+    barberShops BarberShop?
+   
+    // Identificadores de modificação
+    createdAt DateTime @default(now()) @map("DH_USUARIO_CRIACAO")
+    updatedAt DateTime @updatedAt @map("DH_USUARIO_ATUALIZACAO")
+    verifiedAt DateTime? @map("DH_USUARIO_VERIFICACAO")
+    inactivatedAt DateTime? @map("DH_USUARIO_INATIVACAO")
+}
+
+model Customer {
+    // Definições da tabela
+    @@map("TB_CLIENTE")
+    @@unique([contact, barberShopId])
+
+    // Atributos
+    id Int @id @default(autoincrement()) @map("ID_CLIENTE")
+    name String @database.VarChar(128) @map("NM_CLIENTE")
+    contact String @database.VarChar(16) @map("CN_CLIENTE")
+    birthDate DateTime @database.Date @map("DT_CLIENTE_NASCIMENTO")
+
+    // Relacionamentos
+    barberShop BarberShop @relation(fields: [barberShopId], references: [id])
+    barberShopId Int @database.Integer @map("ID_BARBEARIA")
+    attentions Attention[]
+
+    // Identificadores de modificação
+    createdAt DateTime @default(now()) @map("DH_CLIENTE_CRIACAO")
+}
+
+model Employee {
+    // Definições da tabela
+    @@map("TB_FUNCIONARIO")
+
+    // Atributos
+    id Int @id @default(autoincrement()) @map("ID_FUNCIONARIO")
+    nickname String @database.VarChar(128) @map("NM_FUNCIONARIO")
+    accessCode String @database.Char(6) @map("CD_FUNCIONARIO_ACESSO")
+    accessPassword String @database.VarChar(32) @map("SN_FUNCIONARIO_ACESSO") // CRIPTOGRAFADO
+
+    // Relacionamentos
+    barberShop BarberShop @relation(fields: [barberShopId], references: [id])
+    barberShopId Int @database.Integer @map("ID_BARBEARIA")
+    attentions Attention[]
+
+    // Identificadores de modificação
+    createdAt DateTime @default(now()) @map("DH_FUNCIONARIO_CRIACAO")
+    updatedAt DateTime @updatedAt @map("DH_FUNCIONARIO_ATUALIZACAO")
+    inactivatedAt DateTime? @map("DH_FUNCIONARIO_INATIVACAO")
+}
+
+model BarberShop {
+    // Denifições da tabela
+    @@map("TB_BARBEARIA")
+ 
+    // Atributos
+    id Int @id @default(autoincrement()) @map("ID_BARBEARIA")
+    name String @database.VarChar(128) @map("NM_BARBEARIA")
+    description String @database.VarChar(256) @map("DC_BARBEARIA")
+    photo String? @database.VarChar(128) @map("PH_BARBEARIA")
+   
+    // Relacionamentos
+    owner User @relation(fields: [ownerId], references: [id])
+    ownerId Int @unique @database.Integer @map("ID_USUARIO")
+    services Service[]
+    servicesCategories ServiceCategory[]
+    customers Customer[]
+    employees Employee[]
+    attentions Attention[]
+   
+    // Identificadores de modificação
+    createdAt DateTime @default(now()) @map("DH_BARBEARIA_CRIACAO")
+    updatedAt DateTime @updatedAt @map("DH_BARBEARIA_ATUALIZACAO")
+    inactivatedAt DateTime? @map("DH_BARBEARIA_INATIVACAO")
+}
+
+model ServiceCategory {
+    // Definições da tabela
+    @@map("TB_CATEGORIA")
+
+    // Atributos
+    id Int @id @default(autoincrement()) @map("ID_CATEGORIA")
+    name String @database.VarChar(32) @map("NM_CATEGORIA")
+    photo String @database.VarChar(128) @map("PH_CATEGORIA")
+
+    // Relacionamento
+    barberShop BarberShop @relation(fields: [barberShopId], references: [id])
+    barberShopId Int @database.Integer @map("ID_BARBEARIA")
+    services Service[]
+
+    // Identificadores de modificação
+    createdAt DateTime @default(now()) @map("DH_CATEGORIA_CRIACAO")
+    updatedAt DateTime @updatedAt @map("DH_CATEGORIA_ATUALIZACAO")
+    inactivatedAt DateTime? @map("DH_CATEGORIA_INATIVACAO")
+}
+
+model Service {
+    // Definições da tabela
+    @@map("TB_SERVICO")
+
+    // Atributos
+    id Int @id @default(autoincrement()) @map("ID_SERVICO")
+    price Decimal @database.Decimal(10, 2) @map("VL_SERVICO")
+    name String @database.VarChar(128) @map("NM_SERVICO")
+    description String @database.VarChar(256) @map("DC_SERVICO")
+    photo String? @database.VarChar(128) @map("PH_SERVICO")
+
+    // Relacionamentos
+    category ServiceCategory @relation(fields: [categoryId], references: [id])
+    categoryId Int @database.Integer @map("ID_CATEGORIA")
+    barberShop BarberShop @relation(fields: [barberShopId], references: [id])
+    barberShopId Int @database.Integer @map("ID_BARBEARIA")
+    attentions Attention[]
+
+    // Identificadores de modificação
+    createdAt DateTime @default(now()) @map("DH_SERVICO_CRIACAO")
+    updatedAt DateTime @updatedAt @map("DH_SERVICO_ATUALIZACAO")
+    inactivatedAt DateTime? @map("DH_SERVICO_INATIVACAO")
+}
+
+model Attention {
+    // Denifições da tabela
+    @@map("TB_ATENDIMENTO")
+    
+    // Atributos
+    id Int @id @default(autoincrement()) @map("ID_ATENDIMENTO")
+    nickname String @database.VarChar(128) @map("NM_ATENDIMENTO")
+    description String @database.VarChar(256) @map("DC_ATENDIMENTO")
+    services Service[]
+
+    // Relacionamentos
+    barberShop BarberShop @relation(fields: [barberShopId], references: [id])
+    barberShopId Int @database.Integer @map("ID_BARBEARIA")
+    employee Employee @relation(fields: [employeeId], references: [id])
+    employeeId Int @database.Integer @map("ID_FUNCIONARIO")
+    customer Customer @relation(fields: [customerId], references: [id])
+    customerId Int @database.Integer @map("ID_CLIENTE")
+
+    // Identificadores de modificação
+    createdAt DateTime @default(now()) @map("DH_ATENDIMENTO_CRIACAO")
+}
